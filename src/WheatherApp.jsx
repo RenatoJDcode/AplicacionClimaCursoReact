@@ -1,18 +1,20 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
+
+const apikey = import.meta.env.VITE_API_KEY
 
 const WheatherApp = () => {
 
     const urlCity = 'http://api.openweathermap.org/geo/1.0/direct'
     const urlBase = 'https://api.openweathermap.org/data/2.5/weather'
-    const API_KEY = 'ae71b332f986ef7b7657459967d8c9c7'
     const difKelvin = 273.15
 
     const [ciudad, setCiudad] = useState('')
     const [latLong, setLatLong] = useState([])
     const [dataClima, setDataClima] = useState(null)
-    let latitud = 0
-    let longitud = 0
+
+    // let latitud = 0
+    // let longitud = 0
 
     const handleCambioCiudad = (e) => {
         setCiudad(e.target.value)
@@ -22,7 +24,7 @@ const WheatherApp = () => {
         if (ciudad.length > 0) {
             try {
                 await fetchCoordenadas();
-                fetchClima();
+                //fetchClima();
             } catch (error) {
                 console.error('Ocurrió un problema:', error);
             }
@@ -32,11 +34,11 @@ const WheatherApp = () => {
     const fetchCoordenadas = async()=> {
         try {
             // http://api.openweathermap.org/geo/1.0/direct?q=London&limit=5&appid={API key}
-            const response = await fetch (`${urlCity}?q=${ciudad}&appid=${API_KEY}`)
+            const response = await fetch (`${urlCity}?q=${ciudad}&appid=${apikey}`)
             const dataCityCoordenates  = await response.json()
-            // setLatLong([dataCityCoordenates[0].lat,dataCityCoordenates[0].lon])
-            latitud=dataCityCoordenates[0].lat
-            longitud=dataCityCoordenates[0].lon
+            setLatLong([dataCityCoordenates[0].lat,dataCityCoordenates[0].lon])
+            // latitud=dataCityCoordenates[0].lat
+            // longitud=dataCityCoordenates[0].lon
         } catch (error) {
             console.log('Ocurrio el siguiente problema',error);
         }
@@ -45,14 +47,23 @@ const WheatherApp = () => {
     const fetchClima = async()=> {
         try {
             // https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
-            // const response = await fetch (`${urlBase}?lat=${latLong[0]}&lon=${latLong[1]}&appid=${API_KEY}`)
-            const response = await fetch (`${urlBase}?lat=${latitud}&lon=${longitud}&appid=${API_KEY}`)
+            const response = await fetch (`${urlBase}?lat=${latLong[0]}&lon=${latLong[1]}&appid=${apikey}`)
+            // const response = await fetch (`${urlBase}?lat=${latitud}&lon=${longitud}&appid=${apikey}`)
             const dataCity  = await response.json()
             setDataClima(dataCity)
         } catch (error) {
             console.log('Ocurrio el siguiente problema',error);
         }
     }
+
+    useEffect(() => {
+        console.log("HOLA");
+        
+        if (latLong.length > 0) {
+          fetchClima();
+        }
+      }, [latLong]);
+      
 
   return (
     <div className='container'>
